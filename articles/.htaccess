@@ -1,3 +1,4 @@
 Options +Indexes
 IndexOptions FancyIndexing
 IndexOrderDefault Descending Name
+IndexIgnore *.md

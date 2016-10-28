@@ -13,5 +13,5 @@ I learned to appreciate oldschool tools a lot actually in the recent years, ever
 
 I tried various approaches of filling this website with content, the first one was a self-programmed PHP guestbook. At that time I was still living at home in a small place in Bavaria, Germany. Today I type this content in Singapore, where my current home is.
 
-[Back](/..)
+[Back](../)
 [Home](/)
