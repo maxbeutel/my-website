@@ -1,0 +1,12 @@
+
+https://www.cs.kent.ac.uk/people/staff/dat/miranda/whyfp90.pdf
+http://conscientiousprogrammer.com/blog/2014/12/21/how-to-think-about-rust-ownership-versus-c-plus-plus-unique-ptr/
+https://github.com/jarun/Buku/blob/master/README.md
+https://doc.rust-lang.org/beta/std/iter/trait.FromIterator.html
+http://hermanradtke.com/2015/05/03/string-vs-str-in-rust-functions.html
+
+
+http://homepages.inf.ed.ac.uk/rbf/HIPR2/hough.htm
+http://www.sunshine2k.de/coding/java/Houghtransformation/HoughTransform.html
+http://www.keymolen.com/2013/05/hough-transformation-c-implementation.html
+https://rosettacode.org/wiki/Hough_transform
