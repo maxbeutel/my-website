@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Simple Webserver with libevent in C++</title>
+</head>
+<body>
+
+<h1>Simple Webserver with libevent in C++</h1>
+
+<p>For a project written in C++ I wanted to use a webserver component, one that is not too heavyweight, but still capable. Performance should be (of course!) good, but for side-projects I put more emphasis on ease of use. It should be fun after all! My use case is quite simple, I want to implement custom logic for handling an incoming HTTP request. So when <tt>localhost:1234/some/file.png</tt> is requested, a handler function is triggerd and I can execute some custom logic to return some reply to the client.</p>
+
+<p>After some research I considered boost asio and <a href="https://github.com/facebook/proxygen">Facebooks Proxygen</a>. Both libraries are surely up to the job, but I didn't immediately understand from the exmaples how things work, so I disregarded both without bothering too much - too heavyweight.</p>
+
+<p>After a bit more research, I landed finally at libevent, which I haven't used in the longest time. The library for asynchronous I/O scheduling has some components contained in the <tt>&lt;event2/http.h&gt;</tt> header that help with creating a basic socket server. For the time being I don't mind the fact that this server is single-threaded. The documentation and examples around libevents http component were thorough enough to get me started.</p>
+
+<h2>Make it</h2>
+
+<p>The first thing I did when setting up this new project was to create a <tt>Makefile</tt> for it. The second thing I did when setting up this project was giving up writing the <tt>Makefile</tt>. Even though I have a <a href="https://gist.github.com/maxbeutel/e4e7a9a3eb34ace625b6">somewhat clean template for <tt>Makefile</tt>'s</a> I still find the experience quite frustrating whenever I need to change something in that template, like, for example linking against an external library. Which happens rather frequently.</p>
+
+<p>So I went on to write the cmake <tt>CMakeLists.txt</tt> file for it, which worked almost on the first try. In the process of doing this <a href="https://cmake.org/cmake/help/v3.0/command/set.html">I discovered how to properly define parameters for cmake</a>, documenting them and even setting default values for them. The build file looks like this:</p>
+
+<script src="https://gist.github.com/maxbeutel/0882814663c2b390b0583f9e3a4c5c36.js"></script>
+
+<p>I added parameters for passing in name/path of libevent, because I have a local build of libevent in one of my dev folders in order to have full control of what library I link against, avoiding linking against the system-wide libevent library that comes with mac OS. By default it will link against the system-wide installation of libevent, as the default values for the parameters indicate.</p>
+
+<h2>Handling requests</h2>
+
+<p>As mentioned before, I want to handle incoming requests, registering a wildcard "request handler", that is called whenever a client sends a request to the server. Libevent makes this easy, so here is the setup code in the <tt>main()</tt> function, starting an event loop and listening to a certain port on localhost.</p>
+
+<script src="https://gist.github.com/maxbeutel/7e44be6179b95b9caeed5593f687cb5b.js"></script>
+
+<p>Not so special, the main part is <tt>evhttp_set_gencb(http, handle_file, argv[1]);</tt> which registers a callback function <tt>handle_file</tt> that is the catchall handler.</p>
+
+<h2>Translating the URI to a path</h2>
+
+<p>When a request comes in, such as <tt>http://localhost:8881/foo.jpg</tt> I want to do something with <tt>/foo.jpg</tt>, that is, the decoded part of the incoming URI. Whatever I do with that part, be it loading and serving the file, incrementing statistics or something else, in the handler for the request I first need to extract the requested file name from the full URI.</p>
+
+<p>In order to do so, I created a little helper function that can help me with this task. It takes the URI as input and returns the decoded path. It also uses <tt>std::tuple</tt> to indicate if something went wrong. This is more elegant than throwing exceptions, because if the component fails at decoding a URL, this is hardly something exceptional and should not interrupt the normal flow of the program. Instead, the library should clearly communicate what went wrong, so that the caller can decide how to proceed (in this case a <tt>400 - Bad Reuqest</tt> response could be appropriate.)</p>
+
+<p>The helper function looks like this:</p>
+
+<script src="https://gist.github.com/maxbeutel/dce5a511d0a44f95a595f1cb97b54be1.js"></script>
+
+<h2>Implementing the request handler</h2>
+
+<p>The last part is now to implement the actual callback <tt>handle_file</tt>. This implementation doesn't do anything interesting, it only prints the requested path to <tt>stdout</tt> and returns <tt>404 - Not Found</tt>.</p>
+
+<script src="https://gist.github.com/maxbeutel/6eb04784f7c25f6b640f0cb4d16542db.js"></script>
+
+<p>Here we could load a file from disk, determine the mime-type and return it back to the caller, return HTML or do anything else that's interesting. When serving local files, it's really important to make sure that the client is actually allowed to access the file, path injection and the likes are common attack vectors against home-grown servers like this.</p>
+
+<p>With the last part now added, the webserver is functional and can be compiled and started. After starting the webserver we can test if it works using a simple curl command like <tt>curl http://localhost:8881/testing</tt>.</p>
+
+<p>The whole implementation of this <a href="https://github.com/maxbeutel/libevent-webserver">simple webserver in libevent and C++ can be found on GitHub</a>.</p>
+
+</body>
+</html>
